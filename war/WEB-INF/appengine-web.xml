@@ -38,5 +38,13 @@
     stale session data. For details, see
     http://code.google.com/appengine/docs/java/config/appconfig.html#Enabling_Sessions
   -->
-
+  
+  
+  <!-- BEGIN XMPP configurations from: https://developers.google.com/appengine/articles/using_xmpp -->
+  <inbound-services>
+    <service>xmpp_message</service>
+    <service>xmpp_presence</service>
+  </inbound-services>
+  <!-- END XMPP configurations from: https://developers.google.com/appengine/articles/using_xmpp -->
+  
 </appengine-web-app>
