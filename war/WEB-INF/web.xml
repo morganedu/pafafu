@@ -5,6 +5,15 @@ xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
 xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
 http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" version="2.5">
 
+    
+	<servlet>
+		<servlet-name>xmppreceiver</servlet-name>
+		<servlet-class>edu.morgan.pafafu.XmppReceiverServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>xmppreceiver</servlet-name>
+		<url-pattern>/_ah/xmpp/message/chat/</url-pattern>
+	</servlet-mapping>
 
 	<!-- BEGIN HTTPS enabled -->
 	<security-constraint>

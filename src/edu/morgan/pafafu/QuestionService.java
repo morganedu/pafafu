@@ -17,7 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * Handler class for all XMPP messages.
  */
-public class XmppReceiverServlet extends HttpServlet {
+public class QuestionService extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
 	private static final XMPPService xmppService = XMPPServiceFactory.getXMPPService();

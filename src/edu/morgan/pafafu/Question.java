@@ -2,6 +2,7 @@ package edu.morgan.pafafu;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Text;
+import com.google.appengine.api.xmpp.JID;
 
 import java.util.Date;
 
@@ -21,7 +22,7 @@ public class Question {
 	  private Text question;
 	
 	  @Persistent
-	  private String asker;
+	  private JID asker;
 	
 	  @Persistent
 	  private Date asked;
@@ -30,7 +31,7 @@ public class Question {
 	  private Text answer;
 	
 	  @Persistent
-	  private String answerer;
+	  private JID answerer;
 	
 	  @Persistent
 	  private Date answered;
@@ -45,17 +46,9 @@ public class Question {
 	public void setQuestion(Text question) {
 		this.question = question;
 	}
-
-	public void setQuestion(String question) {
-		this.question = question;
-	}
 	
-	public String getAsker() {
+	public JID getAsker() {
 		return asker;
-	}
-
-	public void setAsker(String asker) {
-		this.asker = asker;
 	}
 
 	public Date getAsked() {
@@ -74,12 +67,12 @@ public class Question {
 		this.answer = answer;
 	}
 
-	public String getAnswerer() {
+	public JID getAnswerer() {
 		return answerer;
 	}
 
-	public void setAnswerer(String answerer) {
-		this.answerer = answerer;
+	public void setAnswerer(JID sender) {
+		this.answerer = sender;
 	}
 
 	public Date getAnswered() {
@@ -93,4 +86,16 @@ public class Question {
 	public Key getKey() {
 	    return key;
 	  }
+
+	public void setQuestion(String questionText) {
+		this.question = new Text(questionText);
+	}
+
+	public void setAsker(JID sender) {
+		this.asker = sender;
+	}
+
+	public void setAnswer(String body) {
+		this.setAnswer(new Text(body));	
+	}
 }
