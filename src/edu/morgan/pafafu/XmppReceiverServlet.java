@@ -40,7 +40,7 @@ public class XmppReceiverServlet extends HttpServlet {
   }
 
   private void handleUnrecognizedCommand(Message message) {
-	
+	  replyToMessage(message, "The answer is probably: 42");
 }
 
 /**

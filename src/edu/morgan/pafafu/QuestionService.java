@@ -23,4 +23,24 @@ public class QuestionService extends HttpServlet {
   public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 	  
   }
+
+public Question getAsked(JID sender) {
+	// TODO Auto-generated method stub
+	return null;
+}
+
+public void storeQuestion(Question question) {
+	// TODO Auto-generated method stub
+	
+}
+
+public Question assignQuestion(JID sender) {
+	// TODO Auto-generated method stub
+	return null;
+}
+
+public Question getAnswering(JID sender) {
+	// TODO Auto-generated method stub
+	return null;
+}
 }
