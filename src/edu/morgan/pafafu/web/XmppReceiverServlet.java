@@ -20,8 +20,7 @@ import javax.servlet.http.HttpServletResponse;
 @SuppressWarnings("serial")
 public class XmppReceiverServlet extends HttpServlet {
 
-  private static final XMPPService xmppService =
-      XMPPServiceFactory.getXMPPService();
+  private static final XMPPService xmppService = XMPPServiceFactory.getXMPPService();
 
   public void doPost(HttpServletRequest request, HttpServletResponse response)
       throws IOException {
