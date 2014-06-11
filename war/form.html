@@ -24,9 +24,9 @@
 		</div>
 
 		<div class="container" id="widget_chat">
-			<textarea disabled rows="25" id="widget_target_communication_textarea" style="width:100%;"></textarea>
+			<textarea disabled rows="25" id="widget_target_communication_textarea" style="width:100%;resize:none;"></textarea>
 			<br/>
-			<textarea rows="2" placeholder="Type your question here. When done typing, press enter/return" id="widget_target_communication_input" style="width:100%;"></textarea>
+			<textarea rows="2" placeholder="Type your question here. When done typing, press enter/return" id="widget_target_communication_input" style="width:100%;resize:none;"></textarea>
 		</div>
 		<script type="text/javascript">
 			var body = document.getElementsByTagName('body')[0];
@@ -34,8 +34,16 @@
 			var chat = document.getElementById('widget_chat');
 			var chatButton = document.getElementById('widget_form_button');
 			var select = document.getElementById('selectDepartment');
+			var conversation = document.getElementById('widget_target_communication_textarea');
+			var userInput = document.getElementById('widget_target_communication_input');
 			var selectOption = 0;
 			var urlGetRequest = "";
+
+			if (!String.prototype.contains) {
+			    String.prototype.contains = function(s, i) {
+			        return this.indexOf(s, i) != -1;
+			    }
+			}
 
 			var main = function(){
 				body.removeChild(chat);
@@ -50,6 +58,15 @@
 				select.addEventListener('change',
 					function(){
 						selectOption = this.selectedIndex;
+					},true);
+
+				userInput.addEventListener('keyup',
+					function(event){
+						if(event.keyCode == 13 && this.value !== ""){
+							sendInfoServer(this.value);
+							this.value = "";
+							console.log(0);
+						}
 					},true);
 			}
 
@@ -75,7 +92,21 @@
 				xmlhttp.open("GET",createURLGetRequest(),true);
 				xmlhttp.send();
 			}
+
+			var sendInfoServer = function(message) {
+				var xmlhttp = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP");
+
+				xmlhttp.onreadystatechange = function() {
+					if(conversation.value !== undefined && !conversation.value.toString().contains(message))
+						conversation.value += message;
+				}
+
+				xmlhttp.open("POST","http://1-dot-appspot.com/_ah/xmpp/message/chat/" + message,true);
+				xmlhttp.send();
+			}
 			main();
+
+			// First POST should be: 01234
 		</script>
 </body>
 </html>
