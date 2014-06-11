@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Widget</title>
+	<link rel="stylesheet" type="text/css" href="http://getbootstrap.com/dist/css/bootstrap.min.css"/>
+</head>
+	<body>
+		<div class="container" id="widget_form">
+			<form action="sendMessage" method="GET" class="form-horizontal" role="form">
+				<input type="text" class="form-control" id="inputLastName" placeholder="Last Name"><br/>
+				<input type="text" class="form-control" id="inputFirstName" placeholder="First Name"><br/>
+				<input type="text" class="form-control" id="inputPhoneNumber" placeholder="Phone Number"><br/>
+				<input type="email" class="form-control" id="inputEmail" placeholder="Email"><br/>
+				<select class="form-control" id="selectDepartment" onchange="">
+					<option>Choose one department...</option>
+					<option>Finance</option>
+					<option>Bursar</option>
+					<option>Health Care</option>
+					<option>Education</option>
+					<option>Bla bla</option>
+				</select><br/>
+			</form>
+			<button type="submit" class="btn btn-primary" id="widget_form_button">Chat!</button>
+		</div>
+
+		<div class="container" id="widget_chat">
+			<textarea disabled rows="25" id="widget_target_communication_textarea" style="width:100%;"></textarea>
+			<br/>
+			<textarea rows="2" placeholder="Type your question here. When done typing, press enter/return" id="widget_target_communication_input" style="width:100%;"></textarea>
+		</div>
+		<script type="text/javascript">
+			var body = document.getElementsByTagName('body')[0];
+			var form = document.getElementById('widget_form');
+			var chat = document.getElementById('widget_chat');
+			var chatButton = document.getElementById('widget_form_button');
+			var select = document.getElementById('selectDepartment');
+			var selectOption = 0;
+			var urlGetRequest = "";
+
+			var main = function(){
+				body.removeChild(chat);
+				chatButton.addEventListener('click',
+					function(){
+						createURLGetRequest();
+						body.removeChild(form);
+						body.appendChild(chat);
+						getInfoServer();
+					},true);
+
+				select.addEventListener('change',
+					function(){
+						selectOption = this.selectedIndex;
+					},true);
+			}
+
+			var createURLGetRequest = function(){
+				if(urlGetRequest === ""){
+					urlGetRequest = "http://google.com/page?";
+					urlGetRequest += "lastname=" + document.getElementById('inputLastName').value;
+					urlGetRequest += "&fistname=" + document.getElementById('inputFirstName').value;
+					urlGetRequest += "&email=" + document.getElementById('inputEmail').value;
+					urlGetRequest += "&department=" + document.getElementById('selectDepartment').options[selectOption].value;
+					urlGetRequest += "&phonenumber=" + document.getElementById('inputPhoneNumber').value;
+					console.log(urlGetRequest);
+				}
+				return urlGetRequest;
+			}
+
+			var getInfoServer = function() {
+				var xmlhttp = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP");
+				xmlhttp.onreadystatechange = function() {
+					console.log('done');
+				}
+
+				xmlhttp.open("GET",createURLGetRequest(),true);
+				xmlhttp.send();
+			}
+			main();
+		</script>
+</body>
+</html>

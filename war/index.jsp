@@ -13,5 +13,11 @@
     <center> 
       <font color="gray" size="7">  Hello World!  </font> 
     </center>
+
+    <form action="XmppReceiverServlet" method="POST">
+      <input type="text" name=""/>
+      <input type="submit" value="chat!" name=""/>
+    </form>
+
   </body>
 </html>
