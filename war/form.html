@@ -3,23 +3,28 @@
 <head>
 	<title>Widget</title>
 	<link rel="stylesheet" type="text/css" href="http://getbootstrap.com/dist/css/bootstrap.min.css"/>
+	<style type="text/css">
+		form input,select{
+			margin-bottom: 1%;
+		}
+	</style>
 </head>
 	<body>
 		<div class="container" id="form_frame">
 			<form action="sendMessage" method="GET" class="form-horizontal" role="form">
-				<input type="text" class="form-control" id="lastName" placeholder="Last Name"><br/>
-				<input type="text" class="form-control" id="firstName" placeholder="First Name"><br/>
-				<input type="text" class="form-control" id="phoneNumber" placeholder="Phone Number"><br/>
-				<input type="email" class="form-control" id="email" placeholder="Email"><br/>
-				<select class="form-control" id="form_select" onchange="">
+				<input type="text" class="form-control" id="lastName" placeholder="Last Name">
+				<input type="text" class="form-control" id="firstName" placeholder="First Name">
+				<input type="text" class="form-control" id="phoneNumber" placeholder="Phone Number">
+				<input type="email" class="form-control" id="email" placeholder="Email">
+				<select class="form-control" id="form_select">
 					<option disabled selected>Choose one department...</option>
 					<option>Finance</option>
 					<option>Bursar</option>
 					<option>Health Care</option>
 					<option>Education</option>
-				</select><br/>
+				</select>
 			</form>
-			<button type="submit" class="btn btn-primary" id="form_button">Chat!</button>
+			<button id="form_button" type="submit" class="btn btn-primary">Chat!</button>
 		</div>
 
 		<div class="container" id="chat_frame">
@@ -52,6 +57,22 @@
 				/*EVENT LISTENERS*/
 				domElements.form_button.addEventListener('click',
 					function(){
+						if(document.getElementById("lastName").value == "" || document.getElementById("firstName").value == ""){
+							alert("Empty fields.");
+							return;
+						}
+						else if(!/^\d{10}$/.test(document.getElementById("phoneNumber").value)){
+							alert("Invalid phone number. It must contain 10 digits.");
+							return;
+						}
+						else if(!/\S+@\S+\.\S+/.test(document.getElementById("email").value)){
+							alert("Invalid email.");
+							return;
+						}
+						else if(document.getElementById('form_select').selectedIndex == 0){
+							alert("Select a department.");
+							return;
+						}
 						createUserData();
 						body.removeChild(domElements.form_frame);
 						body.appendChild(domElements.chat_frame);
@@ -75,7 +96,7 @@
 				if(userData === null){
 					userData = new Object({
 						department: document.getElementById('form_select').options[selectOption].value,
-						jid: 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+						jid: 'xxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
 						    var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
 						    return v.toString(16);
 						}) + '@morgan.edu',
