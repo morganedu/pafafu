@@ -5,108 +5,137 @@
 	<link rel="stylesheet" type="text/css" href="http://getbootstrap.com/dist/css/bootstrap.min.css"/>
 </head>
 	<body>
-		<div class="container" id="widget_form">
+		<div class="container" id="form_frame">
 			<form action="sendMessage" method="GET" class="form-horizontal" role="form">
-				<input type="text" class="form-control" id="inputLastName" placeholder="Last Name"><br/>
-				<input type="text" class="form-control" id="inputFirstName" placeholder="First Name"><br/>
-				<input type="text" class="form-control" id="inputPhoneNumber" placeholder="Phone Number"><br/>
-				<input type="email" class="form-control" id="inputEmail" placeholder="Email"><br/>
-				<select class="form-control" id="selectDepartment" onchange="">
-					<option>Choose one department...</option>
+				<input type="text" class="form-control" id="lastName" placeholder="Last Name"><br/>
+				<input type="text" class="form-control" id="firstName" placeholder="First Name"><br/>
+				<input type="text" class="form-control" id="phoneNumber" placeholder="Phone Number"><br/>
+				<input type="email" class="form-control" id="email" placeholder="Email"><br/>
+				<select class="form-control" id="form_select" onchange="">
+					<option disabled selected>Choose one department...</option>
 					<option>Finance</option>
 					<option>Bursar</option>
 					<option>Health Care</option>
 					<option>Education</option>
-					<option>Bla bla</option>
 				</select><br/>
 			</form>
-			<button type="submit" class="btn btn-primary" id="widget_form_button">Chat!</button>
+			<button type="submit" class="btn btn-primary" id="form_button">Chat!</button>
 		</div>
 
-		<div class="container" id="widget_chat">
-			<textarea disabled rows="25" id="widget_target_communication_textarea" style="width:100%;resize:none;"></textarea>
+		<div class="container" id="chat_frame">
+			<textarea id="chat_textarea" disabled rows="25" style="width:100%;resize:none;"></textarea>
 			<br/>
-			<textarea rows="2" placeholder="Type your question here. When done typing, press enter/return" id="widget_target_communication_input" style="width:100%;resize:none;"></textarea>
+			<textarea id="chat_input" rows="2" placeholder="Type your question here. When done typing, press enter/return" style="width:100%;resize:none;"></textarea>
 		</div>
 		<script type="text/javascript">
 			var body = document.getElementsByTagName('body')[0];
-			var form = document.getElementById('widget_form');
-			var chat = document.getElementById('widget_chat');
-			var chatButton = document.getElementById('widget_form_button');
-			var select = document.getElementById('selectDepartment');
-			var conversation = document.getElementById('widget_target_communication_textarea');
-			var userInput = document.getElementById('widget_target_communication_input');
 			var selectOption = 0;
-			var urlGetRequest = "";
+			var baseURI = "http://pafafu.appspot.com/_ah/xmpp/message/chat/";
+			
+			var xmlhttp = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP");
+			var domElements = new Object();
+			var userData = null;
 
-			if (!String.prototype.contains) {
-			    String.prototype.contains = function(s, i) {
-			        return this.indexOf(s, i) != -1;
-			    }
-			}
+			(function(){
+				/*IMPORTANT CONFIGURATION*/
+				if (!String.prototype.contains) {
+				    String.prototype.contains = function(s, i) {
+				        return this.indexOf(s, i) != -1;
+				    }
+				}
 
-			var main = function(){
-				body.removeChild(chat);
-				chatButton.addEventListener('click',
+				for(var i = 0; i<(arrayID = ['form_frame','form_select','form_button','chat_frame','chat_textarea','chat_input']).length; i++)
+					domElements[arrayID[i]] = document.getElementById(arrayID[i]);
+
+				body.removeChild(domElements.chat_frame);
+
+				/*EVENT LISTENERS*/
+				domElements.form_button.addEventListener('click',
 					function(){
-						createURLGetRequest();
-						body.removeChild(form);
-						body.appendChild(chat);
-						getInfoServer();
+						createUserData();
+						body.removeChild(domElements.form_frame);
+						body.appendChild(domElements.chat_frame);
+						ajaxCall('operator');
 					},true);
 
-				select.addEventListener('change',
+				domElements.form_select.addEventListener('change',
 					function(){
 						selectOption = this.selectedIndex;
 					},true);
 
-				userInput.addEventListener('keyup',
+				domElements.chat_input.addEventListener('keyup',
 					function(event){
 						if(event.keyCode == 13 && this.value !== ""){
-							sendInfoServer(this.value);
-							this.value = "";
-							console.log(0);
+							ajaxCall('message');
 						}
 					},true);
+			})();
+
+			var createUserData = function(){
+				if(userData === null){
+					userData = new Object({
+						department: document.getElementById('form_select').options[selectOption].value,
+						jid: 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+						    var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
+						    return v.toString(16);
+						}) + '@morgan.edu',
+						readyCode: '01234'
+					});
+
+					for(var i = 0; i<(arrayInput = ['lastName','firstName','email','phoneNumber']).length; i++)
+						userData[arrayInput[i]] = document.getElementById(arrayInput[i]).value;
+
+					userData.getURI = function(){
+						return encodeURI("http://pafafu.appspot.com/_ah/xmpp/message/chat?"
+							+ "lastname=" + userData.lastName 
+							+ "&fistname=" + userData.firstName
+							+ "&email=" + userData.email
+							+ "&department=" + userData.department 
+							+ "&phonenumber=" + userData.phoneNumber 
+							+ "&jid=" + userData.jid
+						);
+					}
+				}
 			}
 
-			var createURLGetRequest = function(){
-				if(urlGetRequest === ""){
-					urlGetRequest = "http://google.com/page?";
-					urlGetRequest += "lastname=" + document.getElementById('inputLastName').value;
-					urlGetRequest += "&fistname=" + document.getElementById('inputFirstName').value;
-					urlGetRequest += "&email=" + document.getElementById('inputEmail').value;
-					urlGetRequest += "&department=" + document.getElementById('selectDepartment').options[selectOption].value;
-					urlGetRequest += "&phonenumber=" + document.getElementById('inputPhoneNumber').value;
-					console.log(urlGetRequest);
+			var ajaxCall = function(concept){
+				if(concept.contains('message')){
+					xmlhttp.onreadystatechange = sendMessage();
+					xmlhttp.open("POST",baseURI + domElements.chat_input.value,true);
+				} else if(concept.contains('operator')){
+					xmlhttp.onreadystatechange = getOperator();
+					xmlhttp.open("GET",userData.getURI(),true);
+				} else if(concept.contains('token')){
+					xmlhttp.onreadystatechange = sendTokenStartChat();
+					xmlhttp.open("POST",baseURI + userData.readyCode,true);
 				}
-				return urlGetRequest;
-			}
-
-			var getInfoServer = function() {
-				var xmlhttp = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP");
-				xmlhttp.onreadystatechange = function() {
-					console.log('done');
-				}
-
-				xmlhttp.open("GET",createURLGetRequest(),true);
 				xmlhttp.send();
 			}
 
-			var sendInfoServer = function(message) {
-				var xmlhttp = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP");
-
-				xmlhttp.onreadystatechange = function() {
-					if(conversation.value !== undefined && !conversation.value.toString().contains(message))
-						conversation.value += message;
+			var sendMessage = function(){
+				if(xmlhttp.readyState==4 && xmlhttp.status==200){
+					domElements.chat_textarea.value += domElements.chat_input.value;
+					domElements.chat_input.value = "";
 				}
-
-				xmlhttp.open("POST","http://1-dot-appspot.com/_ah/xmpp/message/chat/" + message,true);
-				xmlhttp.send();
+				else{
+					domElements.chat_textarea.value += "Error: " + domElements.chat_input.value;
+					domElements.chat_input.value = "";
+				}
 			}
-			main();
 
-			// First POST should be: 01234
+			var getOperator = function(){
+				if(xmlhttp.readyState==4 && xmlhttp.status==200){
+					console.log('get info from Tunde');
+					ajaxCall('token');
+				}
+			}
+
+			var sendTokenStartChat = function(){
+				if(xmlhttp.readyState==4 && xmlhttp.status==200){
+					console.log('Send 01234 to Tunde');
+				}
+			}
+
 		</script>
 </body>
 </html>
