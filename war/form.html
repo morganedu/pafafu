@@ -28,9 +28,11 @@
 		</div>
 
 		<div class="container" id="chat_frame">
+		<!--
 			<textarea id="chat_textarea" disabled rows="25" style="width:100%;resize:none;"></textarea>
 			<br/>
 			<textarea id="chat_input" rows="2" placeholder="Type your question here. When done typing, press enter/return" style="width:100%;resize:none;"></textarea>
+		-->
 		</div>
 		<script type="text/javascript">
 			var body = document.getElementsByTagName('body')[0];
@@ -49,7 +51,8 @@
 				    }
 				}
 
-				for(var i = 0; i<(arrayID = ['form_frame','form_select','form_button','chat_frame','chat_textarea','chat_input']).length; i++)
+				//for(var i = 0; i<(arrayID = ['form_frame','form_select','form_button','chat_frame','chat_textarea','chat_input']).length; i++)
+				for(var i = 0; i<(arrayID = ['form_frame','form_select','form_button','chat_frame']).length; i++)
 					domElements[arrayID[i]] = document.getElementById(arrayID[i]);
 
 				body.removeChild(domElements.chat_frame);
@@ -146,7 +149,8 @@
 
 			var getOperator = function(){
 				if(xmlhttp.readyState==4 && xmlhttp.status==200){
-					console.log('get info from Tunde');
+					domElements.chat_frame.innerHTML = xmlhttp.responseText;
+					console.log(xmlhttp.responseText);
 					ajaxCall('token');
 				}
 			}
