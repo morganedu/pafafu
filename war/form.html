@@ -35,7 +35,7 @@
 		<script type="text/javascript">
 			var body = document.getElementsByTagName('body')[0];
 			var selectOption = 0;
-			var baseURI = "http://pafafu.appspot.com/_ah/xmpp/message/chat/";
+			var baseURI = "https://morganchitchat.appspot.com/_ah/xmpp/message/chat/";
 			
 			var xmlhttp = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP");
 			var domElements = new Object();
@@ -107,12 +107,12 @@
 						userData[arrayInput[i]] = document.getElementById(arrayInput[i]).value;
 
 					userData.getURI = function(){
-						return encodeURI("http://pafafu.appspot.com/_ah/xmpp/message/chat?"
-							+ "lastname=" + userData.lastName 
-							+ "&fistname=" + userData.firstName
+						return encodeURI(baseURI + "?"
+							+ "lastName=" + userData.lastName 
+							+ "&firstName=" + userData.firstName
 							+ "&email=" + userData.email
 							+ "&department=" + userData.department 
-							+ "&phonenumber=" + userData.phoneNumber 
+							+ "&phoneNumber=" + userData.phoneNumber 
 							+ "&jid=" + userData.jid
 						);
 					}
@@ -156,7 +156,6 @@
 					console.log('Send 01234 to Tunde');
 				}
 			}
-
 		</script>
 </body>
 </html>
