@@ -107,7 +107,7 @@
 						userData[arrayInput[i]] = document.getElementById(arrayInput[i]).value;
 
 					userData.getURI = function(){
-						return encodeURI(baseURI + "?"
+						return encodeURIComponent(baseURI + "?"
 							+ "lastName=" + userData.lastName 
 							+ "&firstName=" + userData.firstName
 							+ "&email=" + userData.email
