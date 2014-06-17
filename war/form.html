@@ -107,14 +107,13 @@
 						userData[arrayInput[i]] = document.getElementById(arrayInput[i]).value;
 
 					userData.getURI = function(){
-						return encodeURIComponent(baseURI + "?"
+						return baseURI + "?"
 							+ "lastName=" + userData.lastName 
 							+ "&firstName=" + userData.firstName
 							+ "&email=" + userData.email
 							+ "&department=" + userData.department 
 							+ "&phoneNumber=" + userData.phoneNumber 
-							+ "&jid=" + userData.jid
-						);
+							+ "&jid=" + userData.jid;
 					}
 				}
 			}
