@@ -113,7 +113,8 @@
 							+ "&email=" + userData.email
 							+ "&department=" + userData.department 
 							+ "&phoneNumber=" + userData.phoneNumber 
-							+ "&jid=" + userData.jid;
+							+ "&jid=" + userData.jid,
+							+ "&get=" + "true";
 					}
 				}
 			}
@@ -124,7 +125,7 @@
 					xmlhttp.open("POST",baseURI + domElements.chat_input.value,true);
 				} else if(concept.contains('operator')){
 					xmlhttp.onreadystatechange = getOperator();
-					xmlhttp.open("GET",userData.getURI(),true);
+					xmlhttp.open("POST",userData.getURI(),true);
 				} else if(concept.contains('token')){
 					xmlhttp.onreadystatechange = sendTokenStartChat();
 					xmlhttp.open("POST",baseURI + userData.readyCode,true);
