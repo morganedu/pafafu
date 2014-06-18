@@ -86,13 +86,6 @@
 					function(){
 						selectOption = this.selectedIndex;
 					},true);
-
-				domElements.chat_input.addEventListener('keyup',
-					function(event){
-						if(event.keyCode == 13 && this.value !== ""){
-							ajaxCall('message');
-						}
-					},true);
 			})();
 
 			var createUserData = function(){
@@ -151,6 +144,16 @@
 				if(xmlhttp.readyState==4 && xmlhttp.status==200){
 					domElements.chat_frame.innerHTML = xmlhttp.responseText;
 					console.log(xmlhttp.responseText);
+					
+					domElements.chat_textarea = document.getElementById('chat_textarea');
+					domElements.chat_input = document.getElementById('chat_input');
+
+					domElements.chat_input.addEventListener('keyup',
+					function(event){
+						if(event.keyCode == 13 && this.value !== ""){
+							ajaxCall('message');
+						}
+					},true);
 					ajaxCall('token');
 				}
 			}
