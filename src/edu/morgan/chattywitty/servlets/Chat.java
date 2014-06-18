@@ -338,11 +338,11 @@ public class Chat extends HttpServlet {
 		phoneNumber = request.getParameter("phoneNumber");
 		jid = request.getParameter("jid");
 		PrintWriter pr = response.getWriter();
-		pr.write("<div class=\"container\" id=\"chat_frame\">");
+		//pr.write("<div class=\"container\" id=\"chat_frame\">");
 		pr.write("<textarea id=\"chat_textarea\" disabled rows=\"25\" style=\"width:100%;resize:none;\"></textarea>");
-		pr.write("<br/>");
+		//pr.write("<br/>");
 		pr.write("<textarea id=\"chat_input\" rows=\"2\" placeholder=\"Type your question here. When done typing, press enter/return\" style=\"width:100%;resize:none;\"></textarea>");
-		pr.write("</div>");
+		//pr.write("</div>");
 		
 		try {
 			Thread.sleep(3000);
