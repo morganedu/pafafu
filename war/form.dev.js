@@ -131,10 +131,10 @@ var ajaxCall = function(concept){
 		xmlhttp.onreadystatechange = 
 			function(){
 				if(xmlhttp.readyState==4 && xmlhttp.status==200){
-					console.log(xmlhttp.responseText);
+					alert(0);
 				}
 			}
-		xmlhttp.open("POST",baseURI,true);
+		xmlhttp.open("POST","/_ah/xmpp/message/chat/",true);
 		xmlhttp.send("token=" + userData.readyCode);
 	}
 	//xmlhttp.send();
