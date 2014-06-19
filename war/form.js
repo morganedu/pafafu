@@ -94,7 +94,8 @@ var ajaxCall = function(concept){
 					}
 				}
 			}
-		xmlhttp.open("POST",baseURI + domElements.chat_input.value,true);
+		xmlhttp.open("POST",baseURI,true);
+		xmlhttp.send("message=" + domElements.chat_input.value);
 	}
 	else if(concept.contains('operator')){
 		xmlhttp.onreadystatechange = 
@@ -122,6 +123,7 @@ var ajaxCall = function(concept){
 				}
 			}
 		xmlhttp.open("GET",userData.getURI(),true);
+		xmlhttp.send();
 	}
 	else if(concept.contains('token')){
 		xmlhttp.onreadystatechange = 
@@ -130,7 +132,8 @@ var ajaxCall = function(concept){
 					console.log('Send 01234 to Tunde');
 				}
 			}
-		xmlhttp.open("POST",baseURI + userData.readyCode,true);
+		xmlhttp.open("POST",baseURI,true);
+		xmlhttp.send("token=" + userData.readyCode);
 	}
-	xmlhttp.send();
+	//xmlhttp.send();
 }
