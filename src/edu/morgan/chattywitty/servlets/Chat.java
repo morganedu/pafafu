@@ -20,10 +20,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-
-
-
-
 import com.google.appengine.api.xmpp.JID;
 import com.google.appengine.api.xmpp.Message;
 import com.google.appengine.api.xmpp.MessageBuilder;
@@ -32,6 +28,7 @@ import com.google.appengine.api.xmpp.Presence;
 import com.google.appengine.api.xmpp.SendResponse;
 import com.google.appengine.api.xmpp.XMPPService;
 import com.google.appengine.api.xmpp.XMPPServiceFactory;
+import com.sun.xml.internal.ws.resources.ClientMessages;
 
 import edu.morgan.chattywitty.database.Operators;
 import edu.morgan.chattywitty.service.OperatorsService;
@@ -46,6 +43,7 @@ public class Chat extends HttpServlet {
 	private String jid;
 	private String operatorEmail;
 	private String newOperatorForTransferEmail;
+	private String clientMessage;
 	private ArrayList<String> allAvailableEmails = new ArrayList<>();
 	private ArrayList<String> rejectEmails = new ArrayList<>();
 	private final XMPPService xmpp = XMPPServiceFactory.getXMPPService();
@@ -70,153 +68,170 @@ public class Chat extends HttpServlet {
 	public void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws IOException {
 
+		String token = request.getParameter("token");
+		String mess = request.getParameter("message");
 		// Get the message that was sent from a JabberID.
 		Message message = xmpp.parseMessage(request);
-		if (message.getBody().startsWith("01234")) {
-			clientEmail = message.getFromJid().getId();
-			initiateChat();
-		} else if (message.getBody().equals("/yes")) {
-			List<Operators> operator = service.getOperatorsByEmail(message
-					.getFromJid().getId().split("/")[0]);
-			operatorScreenName = operator.get(0).getScreenName();
-			sendMessage(clientEmail, "You are now chatting with "
-					+ operatorScreenName);
+		if (token != null && token.equals("01234")) {
+			// initiateChat();
+			PrintWriter wri = response.getWriter();
+			wri.write("Hello, Pablo. You got right!");
+		} else if (mess != null && !mess.isEmpty()) {
+			clientMessage = mess;
+		}
+		else if (message != null) {
+			if (message.getBody().equals("/yes")) {
+				List<Operators> operator = service.getOperatorsByEmail(message
+						.getFromJid().getId().split("/")[0]);
+				operatorScreenName = operator.get(0).getScreenName();
+				sendMessage(clientEmail, "You are now chatting with "
+						+ operatorScreenName);
 
-			operatorEmail = message.getFromJid().getId().split("/")[0];
-			operatorFullName = operator.get(0).getFirstName() + " "
-					+ operator.get(0).getLastName();
-			operatorDepartmentName = operator.get(0).getDepartment();
-			// Make the operator unavailable.
-			operatorId = operator.get(0).getKey().toString();
-			service.updateAvailability(operatorEmail, Chat.NOT_AVAILABLE);
-			operatorAvalaibility = true;
+				operatorEmail = message.getFromJid().getId().split("/")[0];
+				operatorFullName = operator.get(0).getFirstName() + " "
+						+ operator.get(0).getLastName();
+				operatorDepartmentName = operator.get(0).getDepartment();
+				// Make the operator unavailable.
+				operatorId = operator.get(0).getKey().toString();
+				service.updateAvailability(operatorEmail, Chat.NOT_AVAILABLE);
+				operatorAvalaibility = true;
 
-		} else if ((message.getBody().equals("/exit") && message.getFromJid()
-				.getId().contains(operatorEmail))) {
-			// Make operator available
-			service.updateAvailability(operatorEmail, Chat.AVAILABLE);
-			sendMessage(clientEmail, "Bye for now. Thank you for your time...");
-			// send Transcripts to e-mails
-			sendEmail(clientEmail, transcriptBuilder.toString());
-
-			/* Send Transcript to the registered transcript Receiver Email */
-
-			// Severe the connection between the operator and the client.
-			operatorAvalaibility = false;
-
-		} else if ((message.getBody().startsWith("/transfer") && message
-				.getFromJid().getId().contains(operatorEmail))) {
-			newOperatorForTransferScreenName = message.getBody().replace(
-					"/transfer ", "");
-			List<Operators> newOperatorForTransfer = service
-					.getOperatorsByScreenName(newOperatorForTransferScreenName);
-			newOperatorForTransferEmail = newOperatorForTransfer.get(0)
-					.getEmailAddress();
-			if (newOperatorForTransfer.get(0).getAvailable() == Chat.AVAILABLE
-					&& xmpp.getPresence(new JID(newOperatorForTransferEmail))
-							.isAvailable()) {
-				newOperatorDepartmentName = newOperatorForTransfer.get(0)
-						.getDepartment();
-				newOperatorFullName = newOperatorForTransfer.get(0)
-						.getFirstName()
-						+ " "
-						+ newOperatorForTransfer.get(0).getLastName();
-				sendMessage(newOperatorForTransferEmail,
-						"A chat is being transferred to you by "
-								+ operatorFullName + " from "
-								+ operatorDepartmentName
-								+ ". And you'll be chatting with " + firstName
-								+ " " + lastName
-								+ ". Type '/yestransfer' to accept.");
-				sendMessage(clientEmail, "You are now being transferred to "
-						+ newOperatorForTransferScreenName);
-			} else {
-				sendMessage(
-						operatorEmail,
-						newOperatorForTransferScreenName
-								+ " is either busy or offline. You could initiate another transfer...");
-			}
-
-		} else if ((message.getBody().startsWith("/yestransfer") && message
-				.getFromJid().getId().contains(newOperatorForTransferEmail))) {
-			sendMessage(clientEmail, "You are now chatting with "
-					+ newOperatorForTransferScreenName);
-			sendMessage(operatorEmail, "The chat was transferred succesfully.");
-			service.updateAvailability(newOperatorForTransferEmail,
-					Chat.NOT_AVAILABLE);
-			service.updateAvailability(operatorEmail, Chat.AVAILABLE);
-			// Changing the old parameters for the new operator's parameters...
-			operatorEmail = newOperatorForTransferEmail;
-			operatorDepartmentName = newOperatorDepartmentName;
-			operatorFullName = newOperatorFullName;
-			operatorScreenName = newOperatorForTransferScreenName;
-
-		} else if ((message.getBody().startsWith("/groupchat") && message
-				.getFromJid().getId().contains(operatorEmail))) {
-			newOperatorForGroupChatScreenName = message.getBody().replace(
-					"/groupchat ", "");
-			List<Operators> newOperatorForGroupChat = service
-					.getOperatorsByScreenName(newOperatorForGroupChatScreenName);
-			newOperatorForGroupChatEmail = newOperatorForGroupChat.get(0)
-					.getEmailAddress();
-			if (newOperatorForGroupChat.get(0).getAvailable() == Chat.AVAILABLE
-					&& xmpp.getPresence(new JID(newOperatorForGroupChatEmail))
-							.isAvailable()) {
+			} else if ((message.getBody().equals("/exit") && message
+					.getFromJid().getId().contains(operatorEmail))) {
+				// Make operator available
+				service.updateAvailability(operatorEmail, Chat.AVAILABLE);
 				sendMessage(clientEmail,
-						"You are about to enter a group chat with "
-								+ operatorScreenName + " and "
-								+ newOperatorForGroupChatScreenName);
-				sendMessage(newOperatorForGroupChatEmail, operatorFullName
-						+ " from " + operatorDepartmentName
-						+ " wants to include you in a chat with " + firstName
-						+ " " + lastName + ". Type '/yesgroup' to accept.");
+						"Bye for now. Thank you for your time...");
+				// send Transcripts to e-mails
+				sendEmail(clientEmail, transcriptBuilder.toString());
 
+				/* Send Transcript to the registered transcript Receiver Email */
+
+				// Severe the connection between the operator and the client.
+				operatorAvalaibility = false;
+
+			} else if ((message.getBody().startsWith("/transfer") && message
+					.getFromJid().getId().contains(operatorEmail))) {
+				newOperatorForTransferScreenName = message.getBody().replace(
+						"/transfer ", "");
+				List<Operators> newOperatorForTransfer = service
+						.getOperatorsByScreenName(newOperatorForTransferScreenName);
+				newOperatorForTransferEmail = newOperatorForTransfer.get(0)
+						.getEmailAddress();
+				if (newOperatorForTransfer.get(0).getAvailable() == Chat.AVAILABLE
+						&& xmpp.getPresence(
+								new JID(newOperatorForTransferEmail))
+								.isAvailable()) {
+					newOperatorDepartmentName = newOperatorForTransfer.get(0)
+							.getDepartment();
+					newOperatorFullName = newOperatorForTransfer.get(0)
+							.getFirstName()
+							+ " "
+							+ newOperatorForTransfer.get(0).getLastName();
+					sendMessage(newOperatorForTransferEmail,
+							"A chat is being transferred to you by "
+									+ operatorFullName + " from "
+									+ operatorDepartmentName
+									+ ". And you'll be chatting with "
+									+ firstName + " " + lastName
+									+ ". Type '/yestransfer' to accept.");
+					sendMessage(clientEmail,
+							"You are now being transferred to "
+									+ newOperatorForTransferScreenName);
+				} else {
+					sendMessage(
+							operatorEmail,
+							newOperatorForTransferScreenName
+									+ " is either busy or offline. You could initiate another transfer...");
+				}
+
+			} else if ((message.getBody().startsWith("/yestransfer") && message
+					.getFromJid().getId().contains(newOperatorForTransferEmail))) {
+				sendMessage(clientEmail, "You are now chatting with "
+						+ newOperatorForTransferScreenName);
+				sendMessage(operatorEmail,
+						"The chat was transferred succesfully.");
+				service.updateAvailability(newOperatorForTransferEmail,
+						Chat.NOT_AVAILABLE);
+				service.updateAvailability(operatorEmail, Chat.AVAILABLE);
+				// Changing the old parameters for the new operator's
+				// parameters...
+				operatorEmail = newOperatorForTransferEmail;
+				operatorDepartmentName = newOperatorDepartmentName;
+				operatorFullName = newOperatorFullName;
+				operatorScreenName = newOperatorForTransferScreenName;
+
+			} else if ((message.getBody().startsWith("/groupchat") && message
+					.getFromJid().getId().contains(operatorEmail))) {
+				newOperatorForGroupChatScreenName = message.getBody().replace(
+						"/groupchat ", "");
+				List<Operators> newOperatorForGroupChat = service
+						.getOperatorsByScreenName(newOperatorForGroupChatScreenName);
+				newOperatorForGroupChatEmail = newOperatorForGroupChat.get(0)
+						.getEmailAddress();
+				if (newOperatorForGroupChat.get(0).getAvailable() == Chat.AVAILABLE
+						&& xmpp.getPresence(
+								new JID(newOperatorForGroupChatEmail))
+								.isAvailable()) {
+					sendMessage(clientEmail,
+							"You are about to enter a group chat with "
+									+ operatorScreenName + " and "
+									+ newOperatorForGroupChatScreenName);
+					sendMessage(newOperatorForGroupChatEmail, operatorFullName
+							+ " from " + operatorDepartmentName
+							+ " wants to include you in a chat with "
+							+ firstName + " " + lastName
+							+ ". Type '/yesgroup' to accept.");
+
+				} else {
+					sendMessage(
+							operatorEmail,
+							newOperatorForGroupChatEmail
+									+ " is either busy or offline. You could initiate another Group Chat...");
+				}
+
+			} else if ((message.getBody().startsWith("/yesgroup") && message
+					.getFromJid().getId()
+					.contains(newOperatorForGroupChatEmail))) {
+				service.updateAvailability(newOperatorForGroupChatEmail,
+						Chat.NOT_AVAILABLE);
+				groupChatJIDs.add(new JID(clientEmail));
+				groupChatJIDs.add(new JID(operatorEmail));
+				groupChatJIDs.add(new JID(newOperatorForGroupChatEmail));
+				groupChat = true;
+				for (JID jid : groupChatJIDs) {
+					if (jid.getId().contains(newOperatorForGroupChatEmail)) {
+						continue;
+					}
+					sendMessage(jid.getId().split("/")[0],
+							"You are now in a Group Chat with "
+									+ newOperatorForGroupChatScreenName);
+					sendMessage(newOperatorForGroupChatEmail,
+							"You are now in the Group Chat");
+				}
+
+			} else if ((message.getBody().startsWith("/exitgroup") && message
+					.getFromJid().getId()
+					.contains(newOperatorForGroupChatEmail))) {
+				service.updateAvailability(newOperatorForGroupChatEmail,
+						Chat.AVAILABLE);
+
+				// sendMessage();
+				for (JID jid : groupChatJIDs) {
+					if (jid.getId().contains(newOperatorForGroupChatEmail)) {
+						continue;
+					}
+					sendMessage(jid.getId().split("/")[0],
+							newOperatorForGroupChatScreenName
+									+ " left the Group Chat");
+					sendMessage(newOperatorForGroupChatEmail,
+							"You left the Group Chat");
+					groupChat = false;
+					groupChatJIDs.remove(new JID(newOperatorForGroupChatEmail));
+				}
 			} else {
-				sendMessage(
-						operatorEmail,
-						newOperatorForGroupChatEmail
-								+ " is either busy or offline. You could initiate another Group Chat...");
+				startChatting(groupChat, message, groupChatJIDs);
 			}
-
-		} else if ((message.getBody().startsWith("/yesgroup") && message
-				.getFromJid().getId().contains(newOperatorForGroupChatEmail))) {
-			service.updateAvailability(newOperatorForGroupChatEmail,
-					Chat.NOT_AVAILABLE);
-			groupChatJIDs.add(new JID(clientEmail));
-			groupChatJIDs.add(new JID(operatorEmail));
-			groupChatJIDs.add(new JID(newOperatorForGroupChatEmail));
-			groupChat = true;
-			for (JID jid : groupChatJIDs) {
-				if (jid.getId().contains(newOperatorForGroupChatEmail)) {
-					continue;
-				}
-				sendMessage(jid.getId().split("/")[0],
-						"You are now in a Group Chat with "
-								+ newOperatorForGroupChatScreenName);
-				sendMessage(newOperatorForGroupChatEmail,
-						"You are now in the Group Chat");
-			}
-
-		} else if ((message.getBody().startsWith("/exitgroup") && message
-				.getFromJid().getId().contains(newOperatorForGroupChatEmail))) {
-			service.updateAvailability(newOperatorForGroupChatEmail,
-					Chat.AVAILABLE);
-
-			// sendMessage();
-			for (JID jid : groupChatJIDs) {
-				if (jid.getId().contains(newOperatorForGroupChatEmail)) {
-					continue;
-				}
-				sendMessage(jid.getId().split("/")[0],
-						newOperatorForGroupChatScreenName
-								+ " left the Group Chat");
-				sendMessage(newOperatorForGroupChatEmail,
-						"You left the Group Chat");
-				groupChat = false;
-				groupChatJIDs.remove(new JID(newOperatorForGroupChatEmail));
-			}
-		} else {
-			startChatting(groupChat, message, groupChatJIDs);
 		}
 
 	}
@@ -338,12 +353,12 @@ public class Chat extends HttpServlet {
 		phoneNumber = request.getParameter("phoneNumber");
 		jid = request.getParameter("jid");
 		PrintWriter pr = response.getWriter();
-		//pr.write("<div class=\"container\" id=\"chat_frame\">");
+		// pr.write("<div class=\"container\" id=\"chat_frame\">");
 		pr.write("<textarea id=\"chat_textarea\" disabled rows=\"25\" style=\"width:100%;resize:none;\"></textarea>");
-		//pr.write("<br/>");
+		// pr.write("<br/>");
 		pr.write("<textarea id=\"chat_input\" rows=\"2\" placeholder=\"Type your question here. When done typing, press enter/return\" style=\"width:100%;resize:none;\"></textarea>");
-		//pr.write("</div>");
-		
+		// pr.write("</div>");
+
 		try {
 			Thread.sleep(3000);
 		} catch (InterruptedException e) {
