@@ -87,12 +87,14 @@ var ajaxCall = function(concept){
 					domElements.chat_textarea.value += userData.lastName + ": " + domElements.chat_input.value;
 					domElements.chat_input.value = "";
 				}
+				/*
 				else{
 					if(domElements.chat_input.value !== ""){
 						domElements.chat_textarea.value += userData.lastName + "~ERROR~ " + domElements.chat_input.value;
 						domElements.chat_input.value = "";
 					}
 				}
+				*/
 			}
 		xmlhttp.open("POST",baseURI,true);
 		xmlhttp.send("message=" + domElements.chat_input.value);
@@ -129,7 +131,7 @@ var ajaxCall = function(concept){
 		xmlhttp.onreadystatechange = 
 			function(){
 				if(xmlhttp.readyState==4 && xmlhttp.status==200){
-					console.log('Send 01234 to Tunde');
+					console.log('Connected');
 				}
 			}
 		xmlhttp.open("POST",baseURI,true);
