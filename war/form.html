@@ -4,12 +4,14 @@
 	<title>Widget</title>
 	<link rel="stylesheet" type="text/css" href="http://getbootstrap.com/dist/css/bootstrap.min.css"/>
 	<style type="text/css">
-		form input,select{
-			margin-bottom: 1%;
-		}
+		form input,select,.image-center{ margin-bottom: 1%; }
+		.image-center{ width: 205px;height: 200px; }
 	</style>
 </head>
 	<body>
+		<div class="container image-center">
+			<img class="image-center" src="http://www.cfmengineering.com/projects/images/morgan_logo.jpg" >
+		</div>
 		<div class="container" id="form_frame">
 			<form action="sendMessage" method="GET" class="form-horizontal" role="form">
 				<input type="text" class="form-control" id="lastName" placeholder="Last Name">
@@ -110,9 +112,20 @@
 
 			var ajaxCall = function(concept){
 				if(concept.contains('message')){
-					xmlhttp.onreadystatechange = sendMessage();
+					xmlhttp.onreadystatechange = 
+						function(){
+							if(xmlhttp.readyState==4 && xmlhttp.status==200){
+								domElements.chat_textarea.value += domElements.chat_input.value;
+								domElements.chat_input.value = "";
+							}
+							else{
+								domElements.chat_textarea.value += "Error: " + domElements.chat_input.value;
+								domElements.chat_input.value = "";
+							}
+						}
 					xmlhttp.open("POST",baseURI + domElements.chat_input.value,true);
-				} else if(concept.contains('operator')){
+				}
+				else if(concept.contains('operator')){
 					xmlhttp.onreadystatechange = 
 						function(){
 							console.log(xmlhttp.responseText);
@@ -132,17 +145,23 @@
 									}
 								},true);
 								body.removeChild(domElements.form_frame);
-								//ajaxCall('token');
+								ajaxCall('token');
 							}
 						}
 					xmlhttp.open("GET",userData.getURI(),false);
-				} else if(concept.contains('token')){
-					xmlhttp.onreadystatechange = sendTokenStartChat();
+				}
+				else if(concept.contains('token')){
+					xmlhttp.onreadystatechange = 
+						function(){
+							if(xmlhttp.readyState==4 && xmlhttp.status==200){
+								console.log('Send 01234 to Tunde');
+							}
+						}
 					xmlhttp.open("POST",baseURI + userData.readyCode,true);
 				}
 				xmlhttp.send();
 			}
-
+			/*
 			var sendMessage = function(){
 				if(xmlhttp.readyState==4 && xmlhttp.status==200){
 					domElements.chat_textarea.value += domElements.chat_input.value;
@@ -155,11 +174,13 @@
 			}
 
 			var getOperator = function(){
+				console.log(xmlhttp.responseText);
 				if(xmlhttp.readyState==4 && xmlhttp.status==200){
-					/*Add reponse to the chat_frame*/
+					/*Add reponse to the chat_frame/
+					body.appendChild(domElements.chat_frame);
 					domElements.chat_frame.innerHTML = xmlhttp.responseText;
 
-					/*Add the objects from response into the domElements object*/
+					/*Add the objects from response into the domElements object/
 					domElements.chat_textarea = document.getElementById('chat_textarea');
 					domElements.chat_input = document.getElementById('chat_input');
 
@@ -170,8 +191,7 @@
 						}
 					},true);
 					body.removeChild(domElements.form_frame);
-					body.appendChild(domElements.chat_frame);
-					//ajaxCall('token');
+					ajaxCall('token');
 				}
 			}
 
@@ -180,6 +200,7 @@
 					console.log('Send 01234 to Tunde');
 				}
 			}
+			*/
 		</script>
 </body>
 </html>
