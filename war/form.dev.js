@@ -134,7 +134,8 @@ var ajaxCall = function(concept){
 					alert(0);
 				}
 			}
-		xmlhttp.open("POST","/_ah/xmpp/message/chat/",true);
+		xmlhttp.open("POST",baseURI,true);
+		xmlhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 		xmlhttp.send("token=" + userData.readyCode);
 	}
 	//xmlhttp.send();
